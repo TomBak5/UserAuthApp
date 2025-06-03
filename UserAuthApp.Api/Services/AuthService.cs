@@ -7,9 +7,9 @@ namespace UserAuthApp.Api.Services;
 
 public interface IAuthService
 {
-    Task<User?> RegisterAsync(RegisterDto registerDto);
-    Task<User?> LoginAsync(LoginDto loginDto);
-    Task<List<User>> GetAllUsersAsync();
+    Task<User> RegisterAsync(RegisterDto registerDto);
+    Task<User> LoginAsync(LoginDto loginDto);
+    Task<IEnumerable<User>> GetAllUsersAsync();
 }
 
 public class AuthService : IAuthService
@@ -21,49 +21,55 @@ public class AuthService : IAuthService
         _context = context;
     }
 
-    public async Task<User?> RegisterAsync(RegisterDto registerDto)
+    public async Task<User> RegisterAsync(RegisterDto registerDto)
     {
-        if (await _context.Users.AnyAsync(u => u.Email == registerDto.Email))
+        if (string.IsNullOrWhiteSpace(registerDto.Email))
         {
-            return null;
+            throw new InvalidOperationException("Email is required");
+        }
+
+        var emailExists = await _context.Users
+            .AnyAsync(u => u.Email.ToLower() == registerDto.Email.ToLower());
+
+        if (emailExists)
+        {
+            throw new InvalidOperationException("Email already exists");
         }
 
         var user = new User
         {
             FirstName = registerDto.FirstName,
             LastName = registerDto.LastName,
-            Email = registerDto.Email,
-            PhoneNumber = registerDto.PhoneNumber,
-            Age = registerDto.Age,
-            Country = registerDto.Country,
-            City = registerDto.City,
-            Address = registerDto.Address,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(registerDto.Password)
+            Email = registerDto.Email.ToLower(),
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(registerDto.Password),
+            Age = registerDto.Age
         };
 
-        _context.Users.Add(user);
+        await _context.Users.AddAsync(user);
         await _context.SaveChangesAsync();
 
         return user;
     }
 
-    public async Task<User?> LoginAsync(LoginDto loginDto)
+    public async Task<User> LoginAsync(LoginDto loginDto)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginDto.Email);
-        if (user == null)
+        if (string.IsNullOrWhiteSpace(loginDto.Email))
         {
-            return null;
+            throw new InvalidOperationException("Email is required");
         }
 
-        if (!BCrypt.Net.BCrypt.Verify(loginDto.Password, user.PasswordHash))
+        var user = await _context.Users
+            .FirstOrDefaultAsync(u => u.Email.ToLower() == loginDto.Email.ToLower());
+
+        if (user == null || !BCrypt.Net.BCrypt.Verify(loginDto.Password, user.PasswordHash))
         {
-            return null;
+            throw new InvalidOperationException("Invalid email or password");
         }
 
         return user;
     }
 
-    public async Task<List<User>> GetAllUsersAsync()
+    public async Task<IEnumerable<User>> GetAllUsersAsync()
     {
         return await _context.Users.ToListAsync();
     }

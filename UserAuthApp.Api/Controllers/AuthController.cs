@@ -18,31 +18,62 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterDto registerDto)
     {
-        var user = await _authService.RegisterAsync(registerDto);
-        if (user == null)
+        try
         {
-            return BadRequest(new { message = "Email already exists" });
+            var user = await _authService.RegisterAsync(registerDto);
+            return Ok(new { message = "Registration successful", user });
         }
-
-        return Ok(new { message = "Registration successful" });
+        catch (InvalidOperationException ex) when (ex.Message.Contains("Email already exists"))
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (OperationCanceledException)
+        {
+            return StatusCode(503, new { message = "Service temporarily unavailable" });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginDto loginDto)
     {
-        var user = await _authService.LoginAsync(loginDto);
-        if (user == null)
+        try
         {
-            return BadRequest(new { message = "Invalid email or password" });
+            var user = await _authService.LoginAsync(loginDto);
+            return Ok(new { message = "Login successful", user });
         }
-
-        return Ok(new { message = "Login successful" });
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (OperationCanceledException)
+        {
+            return StatusCode(503, new { message = "Service temporarily unavailable" });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
     }
 
     [HttpGet("users")]
     public async Task<IActionResult> GetAllUsers()
     {
-        var users = await _authService.GetAllUsersAsync();
-        return Ok(users);
+        try
+        {
+            var users = await _authService.GetAllUsersAsync();
+            return Ok(users);
+        }
+        catch (OperationCanceledException)
+        {
+            return StatusCode(503, new { message = "Service temporarily unavailable" });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
     }
 } 
