@@ -10,9 +10,8 @@ A full-stack web application providing user authentication functionality with AS
 - List of registered users
 - Modern Material-UI interface
 - Secure password hashing
-- Input validation
-- Error handling
-- Unit and integration tests
+- Input validation and error handling
+- Detailed error logging
 
 ## Tech Stack
 
@@ -21,7 +20,6 @@ A full-stack web application providing user authentication functionality with AS
 - Entity Framework Core
 - SQL Server
 - BCrypt for password hashing
-- xUnit for testing
 - Swagger/OpenAPI
 
 ### Frontend
@@ -56,38 +54,23 @@ A full-stack web application providing user authentication functionality with AS
    ```bash
    dotnet run
    ```
-   The API will be available at `https://localhost:7001`
+   The API will be available at `http://localhost:5158`
 
 ### Frontend Setup
 
-1. Navigate to the frontend project:
+1. Navigate to the client project:
    ```bash
-   cd UserAuthApp.Client
+   cd client
    ```
 2. Install dependencies:
    ```bash
    npm install
    ```
-3. Update the API URL in `src/services/api.ts` if needed
-4. Start the development server:
+3. Start the development server:
    ```bash
    npm start
    ```
-   The application will be available at `http://localhost:3000`
-
-## Running Tests
-
-### Backend Tests
-```bash
-cd UserAuthApp.Tests
-dotnet test
-```
-
-### Integration Tests
-```bash
-cd UserAuthApp.IntegrationTests
-dotnet test
-```
+   The application will be available at `http://localhost:3000` (or next available port)
 
 ## API Endpoints
 
@@ -99,11 +82,18 @@ dotnet test
 
 ```
 UserAuthApp/
-├── UserAuthApp.Api/           # Backend API
-├── UserAuthApp.Client/        # Frontend React application
-├── UserAuthApp.Tests/         # Unit tests
-└── UserAuthApp.IntegrationTests/  # Integration tests
+├── UserAuthApp.Api/     # Backend API
+├── client/             # Frontend React application
+└── README.md
 ```
+
+## Validation Rules
+
+### Registration
+- Password must be at least 6 characters long
+- Phone number must be in a valid format
+- Email must be unique and in valid format
+- All required fields must be filled
 
 ## Security Features
 
@@ -112,19 +102,21 @@ UserAuthApp/
 - CORS configuration
 - Error handling middleware
 - Secure HTTP headers
+- Detailed error logging
 
 ## Development
 
 1. Backend development:
    - Use Visual Studio 2022 or VS Code
    - API documentation available at `/swagger`
-   - Entity Framework migrations for database changes
+   - Entity Framework for database operations
 
 2. Frontend development:
-   - Material-UI components
+   - Material-UI components for modern UI
    - TypeScript for type safety
    - React Router for navigation
    - Axios for API communication
+   - Comprehensive error logging
 
 ## Contributing
 
